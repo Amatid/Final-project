@@ -61,6 +61,7 @@ body {
     display: block;
     margin: auto;
     margin-top: 400px;
+    border: none;
 } 
 .buttonMain:hover { 
     background: rgb(53, 167, 110); 
@@ -68,4 +69,12 @@ body {
 .buttonMain:active {
     background: rgb(33,147,90);
     box-shadow: 0 3px rgb(33,147,90) inset;
+}
+input:disabled{
+    background-color: grey;
+    box-shadow: none;
+    border: none;
+}
+input:disabled:hover{
+    background-color: grey;
 }
