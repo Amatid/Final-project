@@ -30,7 +30,10 @@ mainPage.addEventListener('click', (event) => {
     mainButton.removeAttribute('disabled');
 })
     
-mainButton.addEventListener('click', () => {
+mainButton.addEventListener('click', async () => {
     event.preventDefault();
+    let response = await fetch('http://localhost:3000/menu');
+    let result = await response.json();
+    let calories = result[dataUser.age][dataUser.gender][dataUser.activity];
 })
 

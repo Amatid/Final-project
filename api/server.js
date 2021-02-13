@@ -3,7 +3,8 @@ const express = require('express'),
       morgan = require('morgan'),
 	  fs = require('file-system'),
 	  shortId = require('shortid'),
-	  dbFilePath = 'advices.json',
+	  dbFilePathAdvice = 'advices.json',
+	  dbFilePathCalories = 'calories.json'
       app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -16,21 +17,9 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.get('/', (req, res) => res.send(getAdvicesFromDB()));
+app.get('/', (req, res) => res.send(getAdvicesFromDB(dbFilePathAdvice)));
 
-app.post('/api/task', (req, res) => {
-	const tasksData = getTasksFromDB(),
-		task = req.body;
-
-	task.id = shortId.generate();
-	task.description = task.description || 'No Description';
-	task.status = 'In Progress';
-
-    tasksData.push(task);
-    setTasksToDB(tasksData);
-
-	res.send(task);
-});
+app.get('/menu', (req, res) => res.send(getAdvicesFromDB(dbFilePathCalories)));
 
 app.get('/api/task/:id', (req, res) => {
 	const tasksData = getTasksFromDB(),
@@ -52,7 +41,7 @@ app.put('/api/task/:id', (req, res) => {
 	res.sendStatus(204);
 });
 
-function getAdvicesFromDB() {
+function getAdvicesFromDB(dbFilePath) {
     return JSON.parse(fs.readFileSync(dbFilePath, 'utf8'));
 }
 
