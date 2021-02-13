@@ -3,7 +3,7 @@ const express = require('express'),
       morgan = require('morgan'),
 	  fs = require('file-system'),
 	  shortId = require('shortid'),
-	  dbFilePath = 'tasks.json',
+	  dbFilePath = 'advices.json',
       app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.get('/api/tasks', (req, res) => res.send(getTasksFromDB()));
+app.get('/', (req, res) => res.send(getAdvicesFromDB()));
 
 app.post('/api/task', (req, res) => {
 	const tasksData = getTasksFromDB(),
@@ -52,7 +52,7 @@ app.put('/api/task/:id', (req, res) => {
 	res.sendStatus(204);
 });
 
-function getTasksFromDB() {
+function getAdvicesFromDB() {
     return JSON.parse(fs.readFileSync(dbFilePath, 'utf8'));
 }
 

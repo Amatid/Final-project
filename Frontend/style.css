@@ -7,6 +7,7 @@
     height: 600px;
     margin: auto;
     border-radius: .5em;
+    position: relative;
 }
 select{
     display: block;
@@ -60,8 +61,10 @@ body {
     transition: 0.2s;
     display: block;
     margin: auto;
-    margin-top: 400px;
     border: none;
+    position: absolute;
+    left: 168px;
+    bottom: 30px;
 } 
 .buttonMain:hover { 
     background: rgb(53, 167, 110); 
@@ -80,4 +83,20 @@ input:disabled:hover{
 }
 a{
     text-decoration: none;
+}
+#advice{
+    background: url(https://image.freepik.com/free-vector/light-bulb-icon_18591-39496.jpg) no-repeat;
+    background-size: contain;
+    background-position: center;
+    background-color: white;
+    font-size: 16px; 
+    font-family: sans-serif; 
+    font-weight: 700; 
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    border-radius: 1em;
+}
+p{
+    padding: 0;
 }
