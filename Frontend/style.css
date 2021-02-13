@@ -78,3 +78,6 @@ input:disabled{
 input:disabled:hover{
     background-color: grey;
 }
+a{
+    text-decoration: none;
+}
