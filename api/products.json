@@ -1,0 +1,194 @@
+[
+    {
+        "name": "Йогурт 1,5%",
+        "energyCost": 51
+    },
+    {
+        "name": "Кефир нежирный",
+        "energyCost": 30
+    },
+    {
+        "name": "Кефир жирный",
+        "energyCost": 59
+    },
+    {
+        "name": "Молоко",
+        "energyCost": 58
+    },
+    {
+        "name": "Сметана 20%",
+        "energyCost": 206
+    },
+    {
+        "name": "Сыр российский",
+        "energyCost": 371
+    },
+    {
+        "name": "Арахис",
+        "energyCost": 548
+    },
+    {
+        "name": "Семя подсолнечника",
+        "energyCost": 578
+    },
+    {
+        "name": "Зефир",
+        "energyCost": 299
+    },
+    {
+        "name": "Мармелад",
+        "energyCost": 296
+    },
+    {
+        "name": "Шоколад молочный",
+        "energyCost": 547
+    },
+    {
+        "name": "Торт бисквитный",
+        "energyCost": 386
+    },
+    {
+        "name": "Колбаса вареная докторская",
+        "energyCost": 260
+    },
+    {
+        "name": "Колбаса вареная любительская",
+        "energyCost": 301
+    },
+    {
+        "name": "Сардельки свиные",
+        "energyCost": 332
+    },
+    {
+        "name": "Сосиски молочные",
+        "energyCost": 277
+    },
+    {
+        "name": "Хлеб пшеничный",
+        "energyCost": 254
+    },
+    {
+        "name": "Крупа гречневая",
+        "energyCost": 329
+    },
+    {
+        "name": "Крупа манная",
+        "energyCost": 326
+    },
+    {
+        "name": "Крупа овсяная",
+        "energyCost": 345
+    },
+    {
+        "name": "Крупа перловая",
+        "energyCost": 324
+    },
+    {
+        "name": "Пшено",
+        "energyCost": 334
+    },
+    {
+        "name": "Крупа рисовая",
+        "energyCost": 323
+    },
+    {
+        "name": "Крупа ячневая",
+        "energyCost": 322
+    },
+    {
+        "name": "Яйца куриные",
+        "energyCost": 322
+    },
+    {
+        "name": "Телятина",
+        "energyCost": 97
+    },
+    {
+        "name": "Бананы",
+        "energyCost": 89
+    },
+    {
+        "name": "Творог нежирный",
+        "energyCost": 88
+    },
+    {
+        "name": "Минтай",
+        "energyCost": 72
+    },
+    {
+        "name": "Яблоки",
+        "energyCost": 45
+    },
+    {
+        "name": "Арбуз",
+        "energyCost": 38
+    },
+    {
+        "name": "Морковь",
+        "energyCost": 34
+    },
+    {
+        "name": "Капуста белокачанная",
+        "energyCost": 27
+    },
+    {
+        "name": "Огурцы",
+        "energyCost": 14
+    },
+    {
+        "name": "Борщ из свежей капусты",
+        "energyCost": 322
+    },
+    {
+        "name": "Рассольник",
+        "energyCost": 322
+    },
+    {
+        "name": "Свекольник",
+        "energyCost": 36
+    },
+    {
+        "name": "Солянка мясная",
+        "energyCost": 69
+    },
+    {
+        "name": "Суп гороховый",
+        "energyCost": 66
+    },
+    {
+        "name": "Суп грибной",
+        "energyCost": 26
+    },
+    {
+        "name": "Суп молочный с макаронами",
+        "energyCost": 58
+    },
+    {
+        "name": "Суп молочный с рисом",
+        "energyCost": 54
+    },
+    {
+        "name": "Суп овощной",
+        "energyCost": 43
+    },
+    {
+        "name": "Суп фасолевый",
+        "energyCost": 62
+    },
+    {
+        "name": "Суп щавелевый",
+        "energyCost": 40
+    },
+    {
+        "name": "Уха",
+        "energyCost": 46
+    },
+    {
+        "name": "Щи из квашеной капусты с картофелем",
+        "energyCost": 32
+    },
+    {
+        "name": "Щи из свежей капусты",
+        "energyCost": 31
+    }
+]
