@@ -4,6 +4,7 @@ const express = require('express'),
 	  fs = require('file-system'),
 	  dbFilePathAdvice = 'advices.json',
 	  dbFilePathCalories = 'calories.json'
+	  dbFilePathProducts = 'products.json'
       app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -19,6 +20,8 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => res.send(getAdvicesFromDB(dbFilePathAdvice)));
 
 app.get('/menu', (req, res) => res.send(getAdvicesFromDB(dbFilePathCalories)));
+
+app.get('/products', (req, res) => res.send(getAdvicesFromDB(dbFilePathProducts)));
 
 app.get('/api/task/:id', (req, res) => {
 	const tasksData = getTasksFromDB(),

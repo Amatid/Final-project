@@ -112,3 +112,29 @@ p{
     justify-content: space-between;
     align-items: center;
 }
+.modal{
+    position: absolute;
+    width: 590px;
+    height: 640px;
+    background-color: white;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    overflow: auto;
+}
+table{
+    position: relative;
+    border-collapse: collapse;
+    border: solid 1px black;
+    font-size: 16px; 
+    font-family: sans-serif; 
+    font-weight: 700; 
+}
+td{
+    border: solid 1px black;
+    text-align: center;
+}
+.modal i{
+    font-size: 23px;
+    color: red;   
+}
