@@ -123,12 +123,12 @@ p{
     overflow: auto;
 }
 table{
-    position: relative;
     border-collapse: collapse;
     border: solid 1px black;
     font-size: 16px; 
     font-family: sans-serif; 
     font-weight: 700; 
+    display: block;
 }
 td{
     border: solid 1px black;
@@ -136,5 +136,27 @@ td{
 }
 .modal i{
     font-size: 23px;
-    color: red;   
+    color: red; 
+}
+.icons {
+    display: flex;
+    position: fixed;
+    top: 75px;
+    justify-content: space-between;
+}
+.icons div:first-child>i{
+    color: gray;
+}
+.hide {
+    z-index: -1;
+}
+.modal table i{
+    color: black;
+    font-size: 17px;
+}
+.chosen {
+    background-color: cornflowerblue;
+}
+.activeButton{
+    color: green !important;
 }

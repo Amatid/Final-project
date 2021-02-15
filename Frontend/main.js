@@ -26,36 +26,8 @@ mainPage.addEventListener('click', async (event) => {
         }
     }
     mainButton.removeAttribute('disabled');
-    if (event.target.tagName === 'BUTTON' && event.target.classList.contains('noPosition') || event.target.tagName === 'I') {
-        let modalWindow = document.createElement('div');
-        mainPage.appendChild(modalWindow);
-        modalWindow.classList.add('modal');
-        modalWindow.innerHTML = '<div><i class="fa fa-times" aria-hidden="true"></i></div>';
-        let response = await fetch('http://localhost:3000/products');
-        let result = await response.json();
-        const tableOfProducts = document.createElement('table');
-        modalWindow.appendChild(tableOfProducts);
-        for (let i = 0; i < result.length; i++) {
-            let rowOfTable = document.createElement('tr');
-            tableOfProducts.appendChild(rowOfTable);
-            for (let j = 0; j < 2; j++) {
-                let ceilOfTable = document.createElement('td');
-                rowOfTable.appendChild(ceilOfTable);
-                if (i === 0 && j === 0) {
-                    ceilOfTable.innerHTML = 'Название продукта';
-                    continue;
-                }
-                if (i === 0 && j === 1) {
-                    ceilOfTable.innerHTML = 'Количество килокалорий в 100г.';
-                    continue;
-                }
-                if (j % 2) {
-                    ceilOfTable.innerHTML = result[i].energyCost;
-                } else {
-                    ceilOfTable.innerHTML = result[i].name;
-                }
-            }
-        }
+    if (event.target.tagName === 'BUTTON' && event.target.classList.contains('noPosition') || event.target.tagName === 'I' && event.target.parentElement.tagName === 'BUTTON') {
+        drawModalWindow();
     }
 })
 
@@ -77,6 +49,56 @@ mainButton.addEventListener('click', async () => {
         <button class="buttonMain">Добавить сведения о продукте</button></div>`
     )
 })
+
+async function drawModalWindow() {
+    let modalWindow = document.createElement('div');
+    mainPage.appendChild(modalWindow);
+    modalWindow.classList.add('modal');
+    modalWindow.innerHTML = '<div class = "icons"><div id="accept"><i class="fa fa-check" aria-hidden="true"></i></div><div id="close"><i class="fa fa-times" aria-hidden="true"></i></div></div>';
+    let response = await fetch('http://localhost:3000/products');
+    let result = await response.json();
+    result.sort((a, b) => {
+        let nameA = a.name.toLowerCase();
+        let nameB = b.name.toLowerCase();
+        return (nameA < nameB) ? -1 : (nameA < nameB) ? 1 : 0;
+    })
+    const tableOfProducts = document.createElement('table');
+    modalWindow.appendChild(tableOfProducts);
+    for (let i = 0; i < result.length; i++) {
+        let rowOfTable = document.createElement('tr');
+        tableOfProducts.appendChild(rowOfTable);
+        for (let j = 0; j < 2; j++) {
+            let ceilOfTable = document.createElement('td');
+            rowOfTable.appendChild(ceilOfTable);
+            if (i === 0 && j === 0) {
+                ceilOfTable.innerHTML = 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>';
+                continue;
+            }
+            if (i === 0 && j === 1) {
+                ceilOfTable.innerHTML = 'Количество килокалорий в 100г.';
+                continue;
+            }
+            if (j % 2) {
+                ceilOfTable.innerHTML = result[i].energyCost;
+            } else {
+                ceilOfTable.innerHTML = result[i].name;
+            }
+        }
+    }
+    const acceptButton = document.getElementById('accept');
+    const close = document.getElementById('close');
+    close.addEventListener('click', () => {
+        modalWindow.remove();
+    })
+    tableOfProducts.addEventListener('click', event => {
+        const [rowTitles] = document.getElementsByTagName('tr');
+        if (event.target.tagName !== 'TD' || event.target.parentElement === rowTitles) {
+            return;
+        }
+        event.target.parentElement.classList.add('chosen');
+        acceptButton.firstElementChild.classList.add('activeButton');
+    })
+}
 
 
 
