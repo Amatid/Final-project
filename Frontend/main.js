@@ -4,7 +4,8 @@ let genderEl = document.getElementById('gender');
 let ageEl = document.getElementById('age');
 let activityEl = document.getElementById('activity');
 const dataUser = { gender: null, age: null, activity: null };
-const advice = document.getElementById('advice')
+const advice = document.getElementById('advice');
+const selects = document.getElementsByTagName('select');
 
 window.addEventListener('load', async () => {
     let result = await getDataFromServer('http://localhost:3000');
@@ -18,13 +19,19 @@ genderEl.addEventListener('change', () => dataUser.gender = genderEl.value);
 ageEl.addEventListener('change', () => dataUser.age = ageEl.value);
 activityEl.addEventListener('change', () => dataUser.activity = activityEl.value);
 
-mainPage.addEventListener('click', async (event) => {
-    for (let key in dataUser) {
-        if (dataUser[key] === null) {
-            return;
+for (element of selects) {
+    element.addEventListener('change', () => {
+        for (let key in dataUser) {
+            if (dataUser[key] === null) {
+                return;
+            }
         }
-    }
-    mainButton.removeAttribute('disabled');
+        mainButton.removeAttribute('disabled');
+    })
+}
+
+
+mainPage.addEventListener('click', async (event) => {
     if (event.target.tagName === 'BUTTON' && event.target.classList.contains('noPosition') || event.target.tagName === 'I' && event.target.parentElement.tagName === 'BUTTON') {
         drawModalWindow();
         if (event.target.tagName === 'I') {
@@ -48,8 +55,7 @@ mainButton.addEventListener('click', async () => {
         <p class="menu">2-ой завтрак (${Math.round(calories * 0.10)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
         <p class="menu">Обед (${Math.round(calories * 0.35)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
         <p class="menu">Полдник (${Math.round(calories * 0.1)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Ужин (${Math.round(calories * 0.2)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <button class="buttonMain">Добавить сведения о продукте</button></div>`
+        <p class="menu">Ужин (${Math.round(calories * 0.2)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>`
     )
 })
 
@@ -57,7 +63,7 @@ async function drawModalWindow() {
     let modalWindow = document.createElement('div');
     mainPage.appendChild(modalWindow);
     modalWindow.classList.add('modal');
-    modalWindow.innerHTML = '<div class = "icons"><div id="accept"><i class="fa fa-check" aria-hidden="true"></i></div><div id="close"><i class="fa fa-times" aria-hidden="true"></i></div></div>';
+    modalWindow.innerHTML = '<div class = "icons"><div id="accept"><i class="fa fa-check" aria-hidden="true"></i></div><div id="add"><i class="fa fa-plus" aria-hidden="true"></i></div><div id="close"><i class="fa fa-times" aria-hidden="true"></i></div></div>';
     let result = await getDataFromServer('http://localhost:3000/products');
     sortByName(result);
     drawTable(modalWindow, result);
@@ -103,19 +109,41 @@ async function drawModalWindow() {
         }
         let chosenProducts = Array.from(rowTitles).filter(product => {
             return product.classList.contains('chosen');
-        });
+        })
         chosenProducts = chosenProducts.map(product => {
             return {'name': product.firstChild.innerHTML, 'energyCost': +product.lastElementChild.innerHTML};
-        });
+        })
         modalWindow.remove();
         let pressedButton = Array.from(document.getElementsByTagName('button')).find(button => {
             return button.getAttribute('data-press') === 'active';
-        });
+        })
         for (i=0; i<chosenProducts.length; i++) {
             pressedButton.parentElement.insertAdjacentHTML('afterend', 
-            `<div>${chosenProducts[i].name} <input type="text"> гр. <i class="fa fa-times red" aria-hidden="true"></i></div>`)
+            `<div class="chosenProducts"><div>${chosenProducts[i].name}</div><div><input type="text" maxlength="3"> гр.</div><i class="fa fa-times red" aria-hidden="true"></i></div>`)
         }
-        pressedButton.setAttribute('data-press', 'unactive');         
+        pressedButton.setAttribute('data-press', 'unactive');
+        const inputsQuantityEat = document.getElementsByTagName('input');
+        for (input of inputsQuantityEat) {
+            input.addEventListener('blur', event => {
+                quantityEat = +event.target.value;
+                if (Number.isNaN(quantityEat)){
+                    alert('Введите корректное число');
+                    event.target.value = '';
+                } else {
+                    let findProduct = result.find(product => {
+                        return event.target.parentElement.previousElementSibling.innerHTML === product.name;
+                    })
+                    let calculateCalories = Math.round (findProduct.energyCost / 100 * quantityEat);
+                    event.target.parentElement.previousElementSibling.innerHTML = `${event.target.parentElement.previousElementSibling.innerHTML} ${calculateCalories} килокалорий`
+                }
+            })
+        }
+        const deleteElements = document.getElementsByClassName('fa-times');
+        for (buttonDelete of deleteElements) {
+            buttonDelete.addEventListener('click', event => {
+                event.target.parentElement.remove();
+            })
+        }     
     })
 }
 

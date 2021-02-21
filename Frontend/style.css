@@ -163,3 +163,22 @@ td{
 .red {
     color: red;
 }
+.modal .fa-plus {
+    color: green;
+}
+.modal div{
+    margin-right: 5px;
+}
+.chosenProducts {
+    display: flex;
+    justify-content: space-between;
+}
+.chosenProducts input{
+    width: 25px;
+}
+.chosenProducts div:first-child {
+    width: 270px;
+}
+.chosenProducts div{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
