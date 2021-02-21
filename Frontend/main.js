@@ -7,8 +7,7 @@ const dataUser = { gender: null, age: null, activity: null };
 const advice = document.getElementById('advice')
 
 window.addEventListener('load', async () => {
-    let response = await fetch('http://localhost:3000');
-    let result = await response.json();
+    let result = await getDataFromServer('http://localhost:3000');
     let randomAdvice = result[Math.floor(Math.random() * result.length)];
     advice.innerHTML = `<p>Случайный совет:</p>
     ${randomAdvice}`
@@ -33,8 +32,7 @@ mainPage.addEventListener('click', async (event) => {
 
 mainButton.addEventListener('click', async () => {
     event.preventDefault();
-    let response = await fetch('http://localhost:3000/menu');
-    let result = await response.json();
+    let result = await getDataFromServer('http://localhost:3000/menu');
     let calories = result[dataUser.age][dataUser.gender][dataUser.activity];
     const [form] = document.getElementsByTagName('form');
     form.remove();
@@ -55,16 +53,71 @@ async function drawModalWindow() {
     mainPage.appendChild(modalWindow);
     modalWindow.classList.add('modal');
     modalWindow.innerHTML = '<div class = "icons"><div id="accept"><i class="fa fa-check" aria-hidden="true"></i></div><div id="close"><i class="fa fa-times" aria-hidden="true"></i></div></div>';
-    let response = await fetch('http://localhost:3000/products');
-    let result = await response.json();
-    result.sort((a, b) => {
+    let result = await getDataFromServer('http://localhost:3000/products');
+    objectSortByName(result);
+    drawTable(modalWindow, result);
+    const acceptButton = document.getElementById('accept');
+    const close = document.getElementById('close');
+    close.addEventListener('click', () => {
+        modalWindow.remove();
+    })
+    const [tableOfProducts] = document.getElementsByTagName('table');
+    tableOfProducts.addEventListener('click', event => {
+        const rowTitles = document.getElementsByTagName('tr');
+        const [productTitle, caloriesTitle] = rowTitles[0].getElementsByTagName('td');
+        const allCeilsProducts = document.getElementsByTagName('td');
+        caloriesTitle.setAttribute('data-sort', 'start');
+        if (event.target === productTitle || event.target.tagName === 'I' && event.target.parentElement === productTitle) {
+            switchOfDataAttribute(productTitle, 'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>');
+            let resultReverseByName = result.reverse();
+            fillingTable(allCeilsProducts, resultReverseByName);
+        }
+        if (event.target === caloriesTitle) {
+            let resultSortByEnergyCost = objectSortByEnergyCost(result);
+            fillingTable(allCeilsProducts, resultSortByEnergyCost);
+            switchOfDataAttribute(caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>');
+        }
+        
+
+        if (event.target.tagName === 'TD' && event.target.parentElement !== rowTitles[0]) {
+            event.target.parentElement.classList.toggle('chosen');
+            for (tr of rowTitles) {
+                if (tr.classList.contains('chosen')) {
+                    acceptButton.firstElementChild.classList.add('activeButton');
+                    break;
+                } else {
+                    acceptButton.firstElementChild.classList.remove('activeButton');
+                }
+            }
+        }
+    })
+}
+
+async function getDataFromServer(addresOfRequest) {
+    let response = await fetch(addresOfRequest);
+    return await response.json();
+}
+
+function objectSortByName(object) {
+    return object.sort((a, b) => {
         let nameA = a.name.toLowerCase();
         let nameB = b.name.toLowerCase();
         return (nameA < nameB) ? -1 : (nameA < nameB) ? 1 : 0;
     })
+}
+
+function objectSortByEnergyCost(object) {
+    return object.sort((a, b) => {
+        let nameA = a.energyCost;
+        let nameB = b.energyCost;
+        return (nameA < nameB) ? -1 : (nameA < nameB) ? 1 : 0;
+    })
+}
+
+function drawTable(targetBlock, arrayForTable) {
     const tableOfProducts = document.createElement('table');
-    modalWindow.appendChild(tableOfProducts);
-    for (let i = 0; i < result.length; i++) {
+    targetBlock.appendChild(tableOfProducts);
+    for (let i = 0; i < arrayForTable.length + 1; i++) {
         let rowOfTable = document.createElement('tr');
         tableOfProducts.appendChild(rowOfTable);
         for (let j = 0; j < 2; j++) {
@@ -72,6 +125,7 @@ async function drawModalWindow() {
             rowOfTable.appendChild(ceilOfTable);
             if (i === 0 && j === 0) {
                 ceilOfTable.innerHTML = 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>';
+                ceilOfTable.setAttribute('data-sort', 'start');
                 continue;
             }
             if (i === 0 && j === 1) {
@@ -79,27 +133,31 @@ async function drawModalWindow() {
                 continue;
             }
             if (j % 2) {
-                ceilOfTable.innerHTML = result[i].energyCost;
+                ceilOfTable.innerHTML = arrayForTable[i - 1].energyCost;
             } else {
-                ceilOfTable.innerHTML = result[i].name;
+                ceilOfTable.innerHTML = arrayForTable[i - 1].name;
             }
         }
     }
-    const acceptButton = document.getElementById('accept');
-    const close = document.getElementById('close');
-    close.addEventListener('click', () => {
-        modalWindow.remove();
-    })
-    tableOfProducts.addEventListener('click', event => {
-        const [rowTitles] = document.getElementsByTagName('tr');
-        if (event.target.tagName !== 'TD' || event.target.parentElement === rowTitles) {
-            return;
-        }
-        event.target.parentElement.classList.add('chosen');
-        acceptButton.firstElementChild.classList.add('activeButton');
-    })
 }
 
+function fillingTable(ceilsTable, content) {
+    let j = 0;
+    for (i = 2; i < ceilsTable.length;) {
+        ceilsTable[i].innerHTML = content[j].name;
+        i++;
+        ceilsTable[i].innerHTML = content[j].energyCost;
+        j++;
+        i++;
+    }
+}
 
-
-
+function switchOfDataAttribute(element, symbolBySuccess, symbolByFailure) {
+    if (element.getAttribute('data-sort') === 'start') {
+        element.setAttribute('data-sort', 'finish');
+        element.innerHTML = symbolBySuccess;
+    } else {
+        element.setAttribute('data-sort', 'start');
+        element.innerHTML = symbolByFailure;
+    }
+}
