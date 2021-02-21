@@ -39,11 +39,11 @@ mainButton.addEventListener('click', async () => {
     mainPage.insertAdjacentHTML('afterbegin',
         `<div id = 'secondPage'>
         <p>Ваша норма килокалорий в день: ${calories}</p>
-        <p class="menu">1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)<button class="buttonMain noPosition"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">2-ой завтрак (${Math.round(calories * 0.10)} килокалорий)<button class="buttonMain noPosition"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Обед (${Math.round(calories * 0.35)} килокалорий)<button class="buttonMain noPosition"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Полдник (${Math.round(calories * 0.1)} килокалорий)<button class="buttonMain noPosition"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Ужин (${Math.round(calories * 0.2)} килокалорий)<button class="buttonMain noPosition"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">2-ой завтрак (${Math.round(calories * 0.10)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">Обед (${Math.round(calories * 0.35)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">Полдник (${Math.round(calories * 0.1)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">Ужин (${Math.round(calories * 0.2)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
         <button class="buttonMain">Добавить сведения о продукте</button></div>`
     )
 })
@@ -58,28 +58,15 @@ async function drawModalWindow() {
     drawTable(modalWindow, result);
     const acceptButton = document.getElementById('accept');
     const close = document.getElementById('close');
-    close.addEventListener('click', () => {
-        modalWindow.remove();
-    })
     const [tableOfProducts] = document.getElementsByTagName('table');
     const rowTitles = document.getElementsByTagName('tr');
     const [productTitle, caloriesTitle] = rowTitles[0].getElementsByTagName('td');
     const allCeilsProducts = document.getElementsByTagName('td');
     caloriesTitle.setAttribute('data-sort', 'start');
     tableOfProducts.addEventListener('click', event => {
-        if (event.target === productTitle || event.target.tagName === 'I' && event.target.parentElement === productTitle) {
-            caloriesTitle.innerHTML = 'Количество килокалорий в 100г.';
-            switchOfDataAttribute(productTitle, 'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>', sortByName(result), result);
-            let resultReverseByName = result.reverse();
-            fillingTable(allCeilsProducts, resultReverseByName);
-        }
-        if (event.target === caloriesTitle || event.target.tagName === 'I' && event.target.parentElement === caloriesTitle) {
-            productTitle.innerHTML = 'Название продукта';
-            switchOfDataAttribute(caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>', sortByEnergyCost(result), result);
-            fillingTable(allCeilsProducts, result);
-        }
         if (event.target.tagName === 'TD' && event.target.parentElement !== rowTitles[0]) {
-            event.target.parentElement.classList.toggle('chosen');
+            let parentRow = event.target.parentElement;
+            parentRow.classList.toggle('chosen');
             for (tr of rowTitles) {
                 if (tr.classList.contains('chosen')) {
                     acceptButton.firstElementChild.classList.add('activeButton');
@@ -89,6 +76,27 @@ async function drawModalWindow() {
                 }
             }
         }
+        if (event.target === productTitle || event.target.tagName === 'I' && event.target.parentElement === productTitle) {
+            clearRows(rowTitles, acceptButton);
+            caloriesTitle.innerHTML = 'Количество килокалорий в 100г.';
+            switchOfDataAttribute(productTitle, 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>', 'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', sortByName(result), result);
+            fillingTable(allCeilsProducts, result);
+        }
+        if (event.target === caloriesTitle || event.target.tagName === 'I' && event.target.parentElement === caloriesTitle) {
+            clearRows(rowTitles, acceptButton);
+            productTitle.innerHTML = 'Название продукта';
+            switchOfDataAttribute(caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>', sortByEnergyCost(result), result);
+            fillingTable(allCeilsProducts, result);
+        }
+    })
+    close.addEventListener('click', () => {
+        modalWindow.remove();
+    })
+    acceptButton.addEventListener('click', () => {
+        if (!acceptButton.classList.contains('activebutton')) {
+            return;
+        }
+        
     })
 }
 
@@ -124,7 +132,7 @@ function drawTable(targetBlock, arrayForTable) {
             rowOfTable.appendChild(ceilOfTable);
             if (i === 0 && j === 0) {
                 ceilOfTable.innerHTML = 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>';
-                ceilOfTable.setAttribute('data-sort', 'start');
+                ceilOfTable.setAttribute('data-sort', 'finish');
                 continue;
             }
             if (i === 0 && j === 1) {
@@ -161,4 +169,11 @@ function switchOfDataAttribute(element, symbolBySuccess, symbolByFailure, functi
         element.innerHTML = symbolByFailure;
         objectForReverse.reverse();
     }
+}
+
+function clearRows(rows, buttonForDisabling) {
+    for (let i = 1; i < rows.length; i++) {
+        rows[i].classList.remove('chosen')
+    }
+    buttonForDisabling.firstElementChild.classList.remove('activeButton');
 }
