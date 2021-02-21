@@ -54,7 +54,7 @@ async function drawModalWindow() {
     modalWindow.classList.add('modal');
     modalWindow.innerHTML = '<div class = "icons"><div id="accept"><i class="fa fa-check" aria-hidden="true"></i></div><div id="close"><i class="fa fa-times" aria-hidden="true"></i></div></div>';
     let result = await getDataFromServer('http://localhost:3000/products');
-    objectSortByName(result);
+    sortByName(result);
     drawTable(modalWindow, result);
     const acceptButton = document.getElementById('accept');
     const close = document.getElementById('close');
@@ -62,23 +62,22 @@ async function drawModalWindow() {
         modalWindow.remove();
     })
     const [tableOfProducts] = document.getElementsByTagName('table');
+    const rowTitles = document.getElementsByTagName('tr');
+    const [productTitle, caloriesTitle] = rowTitles[0].getElementsByTagName('td');
+    const allCeilsProducts = document.getElementsByTagName('td');
+    caloriesTitle.setAttribute('data-sort', 'start');
     tableOfProducts.addEventListener('click', event => {
-        const rowTitles = document.getElementsByTagName('tr');
-        const [productTitle, caloriesTitle] = rowTitles[0].getElementsByTagName('td');
-        const allCeilsProducts = document.getElementsByTagName('td');
-        caloriesTitle.setAttribute('data-sort', 'start');
         if (event.target === productTitle || event.target.tagName === 'I' && event.target.parentElement === productTitle) {
-            switchOfDataAttribute(productTitle, 'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>');
+            caloriesTitle.innerHTML = 'Количество килокалорий в 100г.';
+            switchOfDataAttribute(productTitle, 'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>', sortByName(result), result);
             let resultReverseByName = result.reverse();
             fillingTable(allCeilsProducts, resultReverseByName);
         }
-        if (event.target === caloriesTitle) {
-            let resultSortByEnergyCost = objectSortByEnergyCost(result);
-            fillingTable(allCeilsProducts, resultSortByEnergyCost);
-            switchOfDataAttribute(caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>');
+        if (event.target === caloriesTitle || event.target.tagName === 'I' && event.target.parentElement === caloriesTitle) {
+            productTitle.innerHTML = 'Название продукта';
+            switchOfDataAttribute(caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>', sortByEnergyCost(result), result);
+            fillingTable(allCeilsProducts, result);
         }
-        
-
         if (event.target.tagName === 'TD' && event.target.parentElement !== rowTitles[0]) {
             event.target.parentElement.classList.toggle('chosen');
             for (tr of rowTitles) {
@@ -98,7 +97,7 @@ async function getDataFromServer(addresOfRequest) {
     return await response.json();
 }
 
-function objectSortByName(object) {
+const sortByName = object => {
     return object.sort((a, b) => {
         let nameA = a.name.toLowerCase();
         let nameB = b.name.toLowerCase();
@@ -106,7 +105,7 @@ function objectSortByName(object) {
     })
 }
 
-function objectSortByEnergyCost(object) {
+const sortByEnergyCost = object => {
     return object.sort((a, b) => {
         let nameA = a.energyCost;
         let nameB = b.energyCost;
@@ -152,12 +151,14 @@ function fillingTable(ceilsTable, content) {
     }
 }
 
-function switchOfDataAttribute(element, symbolBySuccess, symbolByFailure) {
+function switchOfDataAttribute(element, symbolBySuccess, symbolByFailure, functionForSorting, objectForReverse) {
     if (element.getAttribute('data-sort') === 'start') {
         element.setAttribute('data-sort', 'finish');
         element.innerHTML = symbolBySuccess;
+        functionForSorting;
     } else {
         element.setAttribute('data-sort', 'start');
         element.innerHTML = symbolByFailure;
+        objectForReverse.reverse();
     }
 }
