@@ -27,6 +27,11 @@ mainPage.addEventListener('click', async (event) => {
     mainButton.removeAttribute('disabled');
     if (event.target.tagName === 'BUTTON' && event.target.classList.contains('noPosition') || event.target.tagName === 'I' && event.target.parentElement.tagName === 'BUTTON') {
         drawModalWindow();
+        if (event.target.tagName === 'I') {
+            event.target.parentElement.setAttribute('data-press', 'active');
+        } else {
+            event.target.setAttribute('data-press', 'active');
+        }
     }
 })
 
@@ -39,11 +44,11 @@ mainButton.addEventListener('click', async () => {
     mainPage.insertAdjacentHTML('afterbegin',
         `<div id = 'secondPage'>
         <p>Ваша норма килокалорий в день: ${calories}</p>
-        <p class="menu">1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">2-ой завтрак (${Math.round(calories * 0.10)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Обед (${Math.round(calories * 0.35)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Полдник (${Math.round(calories * 0.1)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu">Ужин (${Math.round(calories * 0.2)} килокалорий)<button class="buttonMain noPosition" data-press="Unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">2-ой завтрак (${Math.round(calories * 0.10)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">Обед (${Math.round(calories * 0.35)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">Полдник (${Math.round(calories * 0.1)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu">Ужин (${Math.round(calories * 0.2)} килокалорий)<button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
         <button class="buttonMain">Добавить сведения о продукте</button></div>`
     )
 })
@@ -93,10 +98,24 @@ async function drawModalWindow() {
         modalWindow.remove();
     })
     acceptButton.addEventListener('click', () => {
-        if (!acceptButton.classList.contains('activebutton')) {
+        if (!acceptButton.firstElementChild.classList.contains('activeButton')) {
             return;
         }
-        
+        let chosenProducts = Array.from(rowTitles).filter(product => {
+            return product.classList.contains('chosen');
+        });
+        chosenProducts = chosenProducts.map(product => {
+            return {'name': product.firstChild.innerHTML, 'energyCost': +product.lastElementChild.innerHTML};
+        });
+        modalWindow.remove();
+        let pressedButton = Array.from(document.getElementsByTagName('button')).find(button => {
+            return button.getAttribute('data-press') === 'active';
+        });
+        for (i=0; i<chosenProducts.length; i++) {
+            pressedButton.parentElement.insertAdjacentHTML('afterend', 
+            `<div>${chosenProducts[i].name} <input type="text"> гр. <i class="fa fa-times red" aria-hidden="true"></i></div>`)
+        }
+        pressedButton.setAttribute('data-press', 'unactive');         
     })
 }
 

@@ -160,3 +160,6 @@ td{
 .activeButton{
     color: green !important;
 }
+.red {
+    color: red;
+}
