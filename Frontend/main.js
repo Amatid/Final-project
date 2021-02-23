@@ -51,11 +51,11 @@ mainButton.addEventListener('click', async () => {
     mainPage.insertAdjacentHTML('afterbegin',
         `<div id = 'secondPage'>
         <p>Ваша норма килокалорий в день: ${calories}</p>
-        <p class="menu"><span>1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span>2-ой завтрак (${Math.round(calories * 0.10)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span>Обед (${Math.round(calories * 0.35)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span>Полдник (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span>Ужин (${Math.round(calories * 0.2)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>`
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.25)}>1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)}>2-ой завтрак (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.35)}>Обед (${Math.round(calories * 0.35)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)}>Полдник (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.2)}>Ужин (${Math.round(calories * 0.2)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>`
     )
 })
 
@@ -126,29 +126,8 @@ async function drawModalWindow() {
         pressedButton.setAttribute('data-press', 'unactive');
         const inputsQuantityEat = document.getElementsByTagName('input');
         for (input of inputsQuantityEat) {
-            input.addEventListener('blur', event => {
-                let quantityEat = +event.target.value;
-                if (Number.isNaN(quantityEat)) {
-                    alert('Введите корректное число');
-                    event.target.value = '';
-                } else {
-                    event.target.parentElement.previousElementSibling.innerHTML = event.target.parentElement.previousElementSibling.innerHTML.replace(/ \d{1,} килокалорий/, '');
-                    let findProduct = result.find(product => {
-                        return event.target.parentElement.previousElementSibling.innerHTML === product.name;
-                    })
-                    let calculateCalories = Math.round(findProduct.energyCost / 100 * quantityEat);
-                    event.target.parentElement.previousElementSibling.innerHTML = `${event.target.parentElement.previousElementSibling.innerHTML} ${calculateCalories} килокалорий`;
-                    let targetStringMill = event.target.parentElement.parentElement.parentElement.previousElementSibling;
-                    let caloriesForMill = targetStringMill.children[0].innerHTML.match(/\d{2,}/g);
-                    if (targetStringMill.children[1].tagName !== 'BUTTON') {
-                        caloriesForMill = targetStringMill.children[1].innerHTML.match (/\d{1,}/);
-                        let remain = caloriesForMill - calculateCalories;
-                        targetStringMill.children[1].innerHTML = ` килокалорий осталось ${remain}`;
-                    } else {
-                        let remain = caloriesForMill - calculateCalories;
-                        targetStringMill.children[0].insertAdjacentHTML ('afterend', `<span> килокалорий осталось ${remain}</span>`) ;
-                    }    
-                }
+            input.addEventListener('change', event => {
+                calculateCalories(event, result);
             })
         }
         const deleteElements = document.getElementsByClassName('fa-times');
@@ -237,3 +216,27 @@ function clearRows(rows, buttonForDisabling) {
     }
     buttonForDisabling.firstElementChild.classList.remove('activeButton');
 }
+
+function calculateCalories (event, arrayOfProducts) {
+    let quantityEat = +event.target.value;
+    if (Number.isNaN(quantityEat)) {
+        alert('Введите корректное число');
+        event.target.value = '';
+    } else {
+        event.target.parentElement.previousElementSibling.innerHTML = event.target.parentElement.previousElementSibling.innerHTML.replace(/ \d{1,} килокалорий/, '');
+        let findProduct = arrayOfProducts.find(product => {
+            return event.target.parentElement.previousElementSibling.innerHTML === product.name;
+        })
+        let calculateCalories = Math.round(findProduct.energyCost / 100 * quantityEat);
+        event.target.parentElement.previousElementSibling.innerHTML = `${event.target.parentElement.previousElementSibling.innerHTML} ${calculateCalories} килокалорий`;
+        let targetStringMill = event.target.parentElement.parentElement.parentElement.previousElementSibling;
+        let caloriesForMill = targetStringMill.children[0].getAttribute('data-caloriesRemain');
+        let remain = caloriesForMill - calculateCalories;
+        if (targetStringMill.children[1].tagName !== 'BUTTON') {
+            targetStringMill.children[1].innerHTML = ` килокалорий осталось ${remain}`;
+        } else {
+            targetStringMill.children[0].insertAdjacentHTML ('afterend', `<span> килокалорий осталось ${remain}</span>`);
+            targetStringMill.children[0].setAttribute('data-caloriesRemain', remain);
+        }    
+    }
+} 
