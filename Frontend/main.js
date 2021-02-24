@@ -51,11 +51,11 @@ mainButton.addEventListener('click', async () => {
     mainPage.insertAdjacentHTML('afterbegin',
         `<div id = 'secondPage'>
         <p>Ваша норма килокалорий в день: ${calories}</p>
-        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.25)}>1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)}>2-ой завтрак (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.35)}>Обед (${Math.round(calories * 0.35)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)}>Полдник (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
-        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.2)}>Ужин (${Math.round(calories * 0.2)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>`
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.25)} data-meal = "breakfast">1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)} data-meal = "lunch">2-ой завтрак (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.35)} data-meal = "dinner">Обед (${Math.round(calories * 0.35)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)} data-meal = "afternoon">Полдник (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
+        <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.2)} data-meal = "evening">Ужин (${Math.round(calories * 0.2)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>`
     )
 })
 
@@ -217,7 +217,7 @@ function clearRows(rows, buttonForDisabling) {
     buttonForDisabling.firstElementChild.classList.remove('activeButton');
 }
 
-function calculateCalories (event, arrayOfProducts) {
+function calculateCalories(event, arrayOfProducts) {
     let quantityEat = +event.target.value;
     if (Number.isNaN(quantityEat)) {
         alert('Введите корректное число');
@@ -231,12 +231,20 @@ function calculateCalories (event, arrayOfProducts) {
         event.target.parentElement.previousElementSibling.innerHTML = `${event.target.parentElement.previousElementSibling.innerHTML} ${calculateCalories} килокалорий`;
         let targetStringMill = event.target.parentElement.parentElement.parentElement.previousElementSibling;
         let caloriesForMill = targetStringMill.children[0].getAttribute('data-caloriesRemain');
-        let remain = caloriesForMill - calculateCalories;
+        let getCalories = 0;
+        for (i = 0; i < event.target.parentElement.parentElement.parentElement.children.length; i++) {
+            if (!(/\d{1,} килокалорий/g).test(event.target.parentElement.parentElement.parentElement.children[i].firstChild.innerHTML)) {
+                continue;
+            }
+            let [getCaloryOneProduct] = event.target.parentElement.parentElement.parentElement.children[i].firstChild.innerHTML.match(/\d{1,} килокалорий/g);
+            getCaloryOneProduct = getCaloryOneProduct.replace(/ килокалорий/, '');
+            getCalories += +getCaloryOneProduct;
+        }
+        let remain = caloriesForMill - getCalories;
         if (targetStringMill.children[1].tagName !== 'BUTTON') {
             targetStringMill.children[1].innerHTML = ` килокалорий осталось ${remain}`;
         } else {
             targetStringMill.children[0].insertAdjacentHTML ('afterend', `<span> килокалорий осталось ${remain}</span>`);
-            targetStringMill.children[0].setAttribute('data-caloriesRemain', remain);
         }    
     }
 } 
