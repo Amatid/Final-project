@@ -32,7 +32,7 @@ for (element of selects) {
 
 
 mainPage.addEventListener('click', async (event) => {
-    if (event.target.tagName === 'BUTTON' && event.target.classList.contains('noPosition') || event.target.tagName === 'I' && event.target.parentElement.tagName === 'BUTTON') {
+    if (event.target.tagName === 'BUTTON' && event.target.classList.contains('noPosition') || event.target.tagName === 'I' && event.target.parentElement.tagName === 'BUTTON' && !event.target.parentElement.classList.contains('unactive')) {
         drawModalWindow();
         if (event.target.tagName === 'I') {
             event.target.parentElement.setAttribute('data-press', 'active');
@@ -50,7 +50,7 @@ mainButton.addEventListener('click', async () => {
     form.remove();
     mainPage.insertAdjacentHTML('afterbegin',
         `<div id = 'secondPage'>
-        <p>Ваша норма килокалорий в день: ${calories}</p>
+        <p data-caloriesRemain = ${calories}>Ваша норма килокалорий в день: ${calories}</p>
         <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.25)} data-meal = "breakfast">1-ый завтрак (${Math.round(calories * 0.25)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
         <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.1)} data-meal = "lunch">2-ой завтрак (${Math.round(calories * 0.1)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
         <p class="menu"><span data-caloriesRemain = ${Math.round(calories * 0.35)} data-meal = "dinner">Обед (${Math.round(calories * 0.35)} килокалорий)</span><button class="buttonMain noPosition" data-press="unactive"><i class="fa fa-plus" aria-hidden="true"></i></button></p>
@@ -120,7 +120,7 @@ async function drawModalWindow() {
         let blockForChosenProducts = document.createElement('div');
         for (i = 0; i < chosenProducts.length; i++) {
             blockForChosenProducts.insertAdjacentHTML('afterbegin',
-                `<div class="chosenProducts"><div>${chosenProducts[i].name}</div><div><input type="text" maxlength="3"> гр.</div><i class="fa fa-times red" aria-hidden="true"></i></div>`)
+                `<div class="chosenProducts"><div>${chosenProducts[i].name}</div><div><input type="text" maxlength="3"> гр.</div><div><i class="fa fa-times red" aria-hidden="true"></i></div></div>`)
         }
         pressedButton.parentElement.insertAdjacentElement('afterend', blockForChosenProducts);
         pressedButton.setAttribute('data-press', 'unactive');
@@ -133,7 +133,9 @@ async function drawModalWindow() {
         const deleteElements = document.getElementsByClassName('fa-times');
         for (buttonDelete of deleteElements) {
             buttonDelete.addEventListener('click', event => {
-                event.target.parentElement.remove();
+                let currentMeaning = +event.target.parentElement.parentElement.parentElement.previousElementSibling.firstChild.getAttribute('data-caloriesRemain');
+                event.target.parentElement.parentElement.parentElement.previousElementSibling.firstChild.setAttribute('data-caloriesRemain', (currentMeaning + +calculateRemain(event)));
+                event.target.parentElement.parentElement.remove();
             })
         }
     })
@@ -229,22 +231,37 @@ function calculateCalories(event, arrayOfProducts) {
         })
         let calculateCalories = Math.round(findProduct.energyCost / 100 * quantityEat);
         event.target.parentElement.previousElementSibling.innerHTML = `${event.target.parentElement.previousElementSibling.innerHTML} ${calculateCalories} килокалорий`;
-        let targetStringMill = event.target.parentElement.parentElement.parentElement.previousElementSibling;
-        let caloriesForMill = targetStringMill.children[0].getAttribute('data-caloriesRemain');
-        let getCalories = 0;
-        for (i = 0; i < event.target.parentElement.parentElement.parentElement.children.length; i++) {
-            if (!(/\d{1,} килокалорий/g).test(event.target.parentElement.parentElement.parentElement.children[i].firstChild.innerHTML)) {
-                continue;
-            }
-            let [getCaloryOneProduct] = event.target.parentElement.parentElement.parentElement.children[i].firstChild.innerHTML.match(/\d{1,} килокалорий/g);
-            getCaloryOneProduct = getCaloryOneProduct.replace(/ килокалорий/, '');
-            getCalories += +getCaloryOneProduct;
-        }
-        let remain = caloriesForMill - getCalories;
-        if (targetStringMill.children[1].tagName !== 'BUTTON') {
-            targetStringMill.children[1].innerHTML = ` килокалорий осталось ${remain}`;
+        let targetStringMeal = event.target.parentElement.parentElement.parentElement.previousElementSibling;
+        let caloriesForMeal = +targetStringMeal.children[0].getAttribute('data-caloriesRemain');
+        let remain = caloriesForMeal - calculateRemain(event);
+        let percentRemainByMeal = remain / caloriesForMeal;
+        targetStringMeal.children[0].setAttribute('data-caloriesRemain', remain);
+        let colorForRemain = percentRemainByMeal > 0.7 ? 'green' : percentRemainByMeal < 0.3 ? 'red' : 'orange';
+        let textForRemain = remain > 0 ? `<span style = "color: ${colorForRemain}"> килокалорий осталось ${remain}</span>` : '<span class="red"> <i class="fa fa-exclamation" aria-hidden="true"></i> прeвышение нормы</span>';
+        if (remain < 0) {
+            targetStringMeal.lastElementChild.setAttribute('disabled', true);
+            targetStringMeal.lastElementChild.classList.add('unactive');   
         } else {
-            targetStringMill.children[0].insertAdjacentHTML ('afterend', `<span> килокалорий осталось ${remain}</span>`);
-        }    
+            targetStringMeal.lastElementChild.removeAttribute('disabled');
+            targetStringMeal.lastElementChild.classList.remove('unactive');
+        }
+        if (targetStringMeal.children[1].tagName !== 'BUTTON') {
+            targetStringMeal.children[1].innerHTML = ` ${textForRemain}`;
+        } else {
+            targetStringMeal.children[0].insertAdjacentHTML('afterend', textForRemain);
+        }
     }
-} 
+}
+
+function calculateRemain(event) {
+    let getCalories = 0;
+    for (i = 0; i < event.target.parentElement.parentElement.parentElement.children.length; i++) {
+        if (!(/\d{1,} килокалорий/g).test(event.target.parentElement.parentElement.parentElement.children[i].firstChild.innerHTML)) {
+            continue;
+        }
+        let [getCaloryOneProduct] = event.target.parentElement.parentElement.parentElement.children[i].firstChild.innerHTML.match(/\d{1,} килокалорий/g);
+        getCaloryOneProduct = getCaloryOneProduct.replace(/ килокалорий/, '');
+        getCalories += +getCaloryOneProduct;
+    }
+    return getCalories;
+}

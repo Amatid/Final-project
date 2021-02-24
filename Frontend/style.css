@@ -182,3 +182,11 @@ td{
 .chosenProducts div{
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
+.unactive{
+    background-color: grey;
+    box-shadow: none;
+    border: none;
+}
+.unactive:disabled:hover{
+    background-color: grey;
+}
