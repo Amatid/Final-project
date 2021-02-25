@@ -1,5 +1,5 @@
 #main {
-    background-image: url('Pictures/main-background.jpg');
+    background-image: url('pictures/main-background.jpg');
     background-repeat: no-repeat;
     background-size: cover;
     width: 550px;
@@ -189,4 +189,30 @@ td{
 }
 .unactive:disabled:hover{
     background-color: grey;
+}
+.modalForAdd {
+    position: absolute;
+    width: 590px;
+    height: 700px;
+    background-color: white;
+    top: -30px;
+    left: 0;
+    z-index: 1;
+    font-family: sans-serif;
+    font-weight: 700;
+}
+.modalForAdd div{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 50px;
+}
+.modalForAdd div:first-child {
+    margin-top: 200px;
+}
+.add{
+    margin: 0 !important;
+    color: gray;
+}
+.modalForAdd i{
+    font-size: 26px;
 }

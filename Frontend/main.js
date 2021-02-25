@@ -19,7 +19,7 @@ genderEl.addEventListener('change', () => dataUser.gender = genderEl.value);
 ageEl.addEventListener('change', () => dataUser.age = ageEl.value);
 activityEl.addEventListener('change', () => dataUser.activity = activityEl.value);
 
-for (element of selects) {
+for (let element of selects) {
     element.addEventListener('change', () => {
         for (let key in dataUser) {
             if (dataUser[key] === null) {
@@ -69,11 +69,13 @@ async function drawModalWindow() {
     drawTable(modalWindow, result);
     const acceptButton = document.getElementById('accept');
     const close = document.getElementById('close');
+    const add = document.getElementById('add');
     const [tableOfProducts] = document.getElementsByTagName('table');
     const rowTitles = document.getElementsByTagName('tr');
     const [productTitle, caloriesTitle] = rowTitles[0].getElementsByTagName('td');
     const allCeilsProducts = document.getElementsByTagName('td');
     caloriesTitle.setAttribute('data-sort', 'start');
+
     tableOfProducts.addEventListener('click', event => {
         if (event.target.tagName === 'TD' && event.target.parentElement !== rowTitles[0]) {
             let parentRow = event.target.parentElement;
@@ -100,9 +102,52 @@ async function drawModalWindow() {
             fillingTable(allCeilsProducts, result);
         }
     })
+
     close.addEventListener('click', () => {
         modalWindow.remove();
     })
+
+    add.addEventListener('click', () => {
+        let modalWindowForAddProduct = document.createElement('div');
+        mainPage.appendChild(modalWindowForAddProduct);
+        modalWindowForAddProduct.classList.add('modalForAdd');
+        modalWindowForAddProduct.innerHTML = '<div><span>Название продукта: </span><input type="text" id="title"></div><div><span>Пищевая ценность в 100г. ккал </span><input type="text" id="energyCost"></div><div><div class = "add"><i class="fa fa-check" aria-hidden="true"></i></div><div class = "close"><i class="fa fa-times red" aria-hidden="true"></i></div></div>'
+        const titleOfProducts = document.getElementById('title');
+        const energyCost = document.getElementById('energyCost');
+        const [closeWindowOfAddProduct] = modalWindowForAddProduct.getElementsByClassName('close');
+        const [addNewProduct] = modalWindowForAddProduct.getElementsByClassName('add');
+        const inputsOfWindowAddProduct = modalWindowForAddProduct.getElementsByTagName('input');
+        const newProduct = { name: null, energyCost: null };
+        for (input of inputsOfWindowAddProduct) {
+            input.addEventListener('blur', () => {
+                for (let i = 0; i < inputsOfWindowAddProduct.length; i++) {
+                    if (inputsOfWindowAddProduct[i].value === '') {
+                        addNewProduct.classList.remove('activeButton');
+                        return;
+                    }
+                }
+                addNewProduct.classList.add('activeButton');
+            })
+        }
+
+        closeWindowOfAddProduct.addEventListener('click', () => {
+            modalWindowForAddProduct.remove();
+        })
+
+        addNewProduct.addEventListener('click', () => {
+            if (!addNewProduct.classList.contains('activeButton')) {
+                return;
+            }
+            newProduct.name = titleOfProducts.value;
+            newProduct.energyCost = +energyCost.value;
+            if (Number.isNaN(newProduct.energyCost)) {
+                alert('Поле пищевая ценность должно содержать цифры!');
+                energyCost.value = '';
+                addNewProduct.classList.remove('activeButton');
+            }
+        })
+    })
+
     acceptButton.addEventListener('click', () => {
         if (!acceptButton.firstElementChild.classList.contains('activeButton')) {
             return;
@@ -133,8 +178,10 @@ async function drawModalWindow() {
         const deleteElements = document.getElementsByClassName('fa-times');
         for (buttonDelete of deleteElements) {
             buttonDelete.addEventListener('click', event => {
-                let currentMeaning = +event.target.parentElement.parentElement.parentElement.previousElementSibling.firstChild.getAttribute('data-caloriesRemain');
-                event.target.parentElement.parentElement.parentElement.previousElementSibling.firstChild.setAttribute('data-caloriesRemain', (currentMeaning + +calculateRemain(event)));
+                let targetStringMeal = event.target.parentElement.parentElement.parentElement.previousElementSibling;
+                let caloriesForMeal = +targetStringMeal.children[0].getAttribute('data-caloriesRemain');
+                let remain = caloriesForMeal + calculateRemain(event);
+                drawRemainCalories(targetStringMeal, remain, caloriesForMeal);
                 event.target.parentElement.parentElement.remove();
             })
         }
@@ -234,22 +281,7 @@ function calculateCalories(event, arrayOfProducts) {
         let targetStringMeal = event.target.parentElement.parentElement.parentElement.previousElementSibling;
         let caloriesForMeal = +targetStringMeal.children[0].getAttribute('data-caloriesRemain');
         let remain = caloriesForMeal - calculateRemain(event);
-        let percentRemainByMeal = remain / caloriesForMeal;
-        targetStringMeal.children[0].setAttribute('data-caloriesRemain', remain);
-        let colorForRemain = percentRemainByMeal > 0.7 ? 'green' : percentRemainByMeal < 0.3 ? 'red' : 'orange';
-        let textForRemain = remain > 0 ? `<span style = "color: ${colorForRemain}"> килокалорий осталось ${remain}</span>` : '<span class="red"> <i class="fa fa-exclamation" aria-hidden="true"></i> прeвышение нормы</span>';
-        if (remain < 0) {
-            targetStringMeal.lastElementChild.setAttribute('disabled', true);
-            targetStringMeal.lastElementChild.classList.add('unactive');   
-        } else {
-            targetStringMeal.lastElementChild.removeAttribute('disabled');
-            targetStringMeal.lastElementChild.classList.remove('unactive');
-        }
-        if (targetStringMeal.children[1].tagName !== 'BUTTON') {
-            targetStringMeal.children[1].innerHTML = ` ${textForRemain}`;
-        } else {
-            targetStringMeal.children[0].insertAdjacentHTML('afterend', textForRemain);
-        }
+        drawRemainCalories(targetStringMeal, remain, caloriesForMeal);
     }
 }
 
@@ -264,4 +296,23 @@ function calculateRemain(event) {
         getCalories += +getCaloryOneProduct;
     }
     return getCalories;
+}
+
+function drawRemainCalories(targetStringMeal, remain, caloriesForMeal) {
+    let percentRemainByMeal = remain / caloriesForMeal;
+    targetStringMeal.children[0].setAttribute('data-caloriesRemain', remain);
+    let colorForRemain = percentRemainByMeal > 0.7 ? 'green' : percentRemainByMeal < 0.3 ? 'red' : 'orange';
+    let textForRemain = remain > 0 ? `<span style = "color: ${colorForRemain}"> килокалорий осталось ${remain}</span>` : '<span class="red"> <i class="fa fa-exclamation" aria-hidden="true"></i> прeвышение нормы</span>';
+    if (remain < 0) {
+        targetStringMeal.lastElementChild.setAttribute('disabled', true);
+        targetStringMeal.lastElementChild.classList.add('unactive');
+    } else {
+        targetStringMeal.lastElementChild.removeAttribute('disabled');
+        targetStringMeal.lastElementChild.classList.remove('unactive');
+    }
+    if (targetStringMeal.children[1].tagName !== 'BUTTON') {
+        targetStringMeal.children[1].innerHTML = ` ${textForRemain}`;
+    } else {
+        targetStringMeal.children[0].insertAdjacentHTML('afterend', textForRemain);
+    }
 }
