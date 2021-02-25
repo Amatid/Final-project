@@ -4,7 +4,7 @@ const express = require('express'),
 	  fs = require('file-system'),
 	  dbFilePathAdvice = 'advices.json',
 	  dbFilePathCalories = 'calories.json'
-	  dbFilePathProducts = 'products.json'
+	  dbFilePathProducts = './products.json'
       app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -30,25 +30,25 @@ app.get('/api/task/:id', (req, res) => {
     task ? res.send(task) : res.send({});
 });
 
-app.put('/api/task/:id', (req, res) => {
-	const tasksData = getTasksFromDB(),
-		task = tasksData.find(task => task.id === req.params.id),
-		updatedTask = req.body;
+app.post('/addProduct', (req, res) => {
+	// const currentProduct = getAdvicesFromDB(dbFilePathProducts),
+	// 	task = tasksData.find(task => task.id === req.params.id),
+	// 	updatedTask = req.body;
 
-	task.title = updatedTask.title;
-	task.description = updatedTask.description || 'No Description';
+	// task.title = updatedTask.title;
+	// task.description = updatedTask.description || 'No Description';
+	recordNewArray(req.body);
 
-    setTasksToDB(tasksData);
-
-	res.sendStatus(204);
+	// res.sendStatus(204);
 });
 
 function getAdvicesFromDB(dbFilePath) {
     return JSON.parse(fs.readFileSync(dbFilePath, 'utf8'));
 }
 
-function setTasksToDB(tasksData) {
-    fs.writeFileSync(dbFilePath, JSON.stringify(tasksData));
+function recordNewArray(productsData) {
+	console.log(dbFilePathProducts);
+    fs.writeFileSync(dbFilePathProducts, JSON.stringify(productsData));
 }
 
 app.listen(3000, () => console.log('Server has been started...'));

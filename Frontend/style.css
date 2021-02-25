@@ -205,6 +205,8 @@ td{
     display: flex;
     justify-content: space-between;
     margin-bottom: 50px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 .modalForAdd div:first-child {
     margin-top: 200px;

@@ -118,7 +118,7 @@ async function drawModalWindow() {
         const [addNewProduct] = modalWindowForAddProduct.getElementsByClassName('add');
         const inputsOfWindowAddProduct = modalWindowForAddProduct.getElementsByTagName('input');
         const newProduct = { name: null, energyCost: null };
-        for (input of inputsOfWindowAddProduct) {
+        for (let input of inputsOfWindowAddProduct) {
             input.addEventListener('blur', () => {
                 for (let i = 0; i < inputsOfWindowAddProduct.length; i++) {
                     if (inputsOfWindowAddProduct[i].value === '') {
@@ -130,11 +130,7 @@ async function drawModalWindow() {
             })
         }
 
-        closeWindowOfAddProduct.addEventListener('click', () => {
-            modalWindowForAddProduct.remove();
-        })
-
-        addNewProduct.addEventListener('click', () => {
+        addNewProduct.addEventListener('click', async () => {
             if (!addNewProduct.classList.contains('activeButton')) {
                 return;
             }
@@ -145,7 +141,27 @@ async function drawModalWindow() {
                 energyCost.value = '';
                 addNewProduct.classList.remove('activeButton');
             }
+            result.push(newProduct);
+            let response = await fetch('http://localhost:3000/addProduct', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(result)
+            });
+            сonsole.log(response);
+            let answer = await response.json();
+            console.log(answer);
+            modalWindowForAddProduct.remove();
+            tableOfProducts.remove();
+            sortByName(result);
+            drawTable(modalWindow, result);
         })
+
+        closeWindowOfAddProduct.addEventListener('click', () => {
+            modalWindowForAddProduct.remove();
+        })
+
     })
 
     acceptButton.addEventListener('click', () => {
@@ -162,15 +178,22 @@ async function drawModalWindow() {
         let pressedButton = Array.from(document.getElementsByTagName('button')).find(button => {
             return button.getAttribute('data-press') === 'active';
         })
-        let blockForChosenProducts = document.createElement('div');
-        for (i = 0; i < chosenProducts.length; i++) {
-            blockForChosenProducts.insertAdjacentHTML('afterbegin',
-                `<div class="chosenProducts"><div>${chosenProducts[i].name}</div><div><input type="text" maxlength="3"> гр.</div><div><i class="fa fa-times red" aria-hidden="true"></i></div></div>`)
+        if (pressedButton.parentElement.nextElementSibling === null || pressedButton.parentElement.nextElementSibling.classList.contains('menu')) {
+            let blockForChosenProducts = document.createElement('div');
+            for (let i = 0; i < chosenProducts.length; i++) {
+                blockForChosenProducts.insertAdjacentHTML('afterbegin',
+                    `<div class="chosenProducts"><div>${chosenProducts[i].name}</div><div><input type="text" maxlength="3"> гр.</div><div><i class="fa fa-times red" aria-hidden="true"></i></div></div>`)
+            }
+            pressedButton.parentElement.insertAdjacentElement('afterend', blockForChosenProducts);
+        } else {
+            for (let i = 0; i < chosenProducts.length; i++) {
+                pressedButton.parentElement.nextElementSibling.insertAdjacentHTML('beforeend',
+                    `<div class="chosenProducts"><div>${chosenProducts[i].name}</div><div><input type="text" maxlength="3"> гр.</div><div><i class="fa fa-times red" aria-hidden="true"></i></div></div>`)
+            }
         }
-        pressedButton.parentElement.insertAdjacentElement('afterend', blockForChosenProducts);
         pressedButton.setAttribute('data-press', 'unactive');
         const inputsQuantityEat = document.getElementsByTagName('input');
-        for (input of inputsQuantityEat) {
+        for (let input of inputsQuantityEat) {
             input.addEventListener('change', event => {
                 calculateCalories(event, result);
             })
@@ -182,7 +205,11 @@ async function drawModalWindow() {
                 let caloriesForMeal = +targetStringMeal.children[0].getAttribute('data-caloriesRemain');
                 let remain = caloriesForMeal + calculateRemain(event);
                 drawRemainCalories(targetStringMeal, remain, caloriesForMeal);
-                event.target.parentElement.parentElement.remove();
+                if (event.target.parentElement.parentElement.parentElement.children.length === 1) {
+                    event.target.parentElement.parentElement.parentElement.remove();
+                } else {
+                    event.target.parentElement.parentElement.remove();
+                }
             })
         }
     })
