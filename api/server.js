@@ -23,23 +23,10 @@ app.get('/menu', (req, res) => res.send(getAdvicesFromDB(dbFilePathCalories)));
 
 app.get('/products', (req, res) => res.send(getAdvicesFromDB(dbFilePathProducts)));
 
-app.get('/api/task/:id', (req, res) => {
-	const tasksData = getTasksFromDB(),
-		task = tasksData.find(task => task.id === req.params.id);
-
-    task ? res.send(task) : res.send({});
-});
-
 app.post('/addProduct', (req, res) => {
-	// const currentProduct = getAdvicesFromDB(dbFilePathProducts),
-	// 	task = tasksData.find(task => task.id === req.params.id),
-	// 	updatedTask = req.body;
-
-	// task.title = updatedTask.title;
-	// task.description = updatedTask.description || 'No Description';
+	
 	recordNewArray(req.body);
 
-	// res.sendStatus(204);
 });
 
 function getAdvicesFromDB(dbFilePath) {
