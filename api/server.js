@@ -2,9 +2,9 @@ const express = require('express'),
       bodyParser = require('body-parser'),
       morgan = require('morgan'),
 	  fs = require('file-system'),
-	  dbFilePathAdvice = 'advices.json',
-	  dbFilePathCalories = 'calories.json'
-	  dbFilePathProducts = './products.json'
+	  dbFilePathAdvice = './json/advices.json',
+	  dbFilePathCalories = './json/calories.json'
+	  dbFilePathProducts = './json/products.json'
       app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));

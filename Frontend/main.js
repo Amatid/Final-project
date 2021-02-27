@@ -9,8 +9,8 @@ const selects = document.getElementsByTagName('select');
 const [allCaloriesBlock] = document.getElementsByTagName('p');
 
 window.addEventListener('load', async () => {
-    let result = await getDataFromServer('http://localhost:3000');
-    let randomAdvice = result[Math.floor(Math.random() * result.length)];
+    let advices = await getDataFromServer('http://localhost:3000');
+    let randomAdvice = advices[Math.floor(Math.random() * advices.length)];
     advice.innerHTML = `<p>Случайный совет:</p>
     ${randomAdvice}`
         ;
@@ -45,8 +45,8 @@ mainPage.addEventListener('click', async (event) => {
 
 mainButton.addEventListener('click', async () => {
     event.preventDefault();
-    let result = await getDataFromServer('http://localhost:3000/menu');
-    let calories = result[dataUser.age][dataUser.gender][dataUser.activity];
+    let user = await getDataFromServer('http://localhost:3000/menu');
+    let calories = user[dataUser.age][dataUser.gender][dataUser.activity];
     const [form] = document.getElementsByTagName('form');
     form.remove();
     mainPage.insertAdjacentHTML('afterbegin',
@@ -65,16 +65,16 @@ async function drawModalWindow() {
     mainPage.appendChild(modalWindow);
     modalWindow.classList.add('modal');
     modalWindow.innerHTML = '<div class = "icons"><div id="accept"><i class="fa fa-check" aria-hidden="true"></i></div><div id="add"><i class="fa fa-plus" aria-hidden="true"></i></div><div id="close"><i class="fa fa-times" aria-hidden="true"></i></div></div>';
-    let result = await getDataFromServer('http://localhost:3000/products');
-    sortByName(result);
-    drawTable(modalWindow, result);
+    let products = await getDataFromServer('http://localhost:3000/products');
+    sortByName(products);
+    drawTable(modalWindow, products);
     const acceptButton = document.getElementById('accept');
     const close = document.getElementById('close');
     const add = document.getElementById('add');
     const [tableOfProducts] = document.getElementsByTagName('table');
     const rowTitles = document.getElementsByTagName('tr');
     const [productTitle, caloriesTitle] = rowTitles[0].getElementsByTagName('td');
-    const allCeilsProducts = document.getElementsByTagName('td');
+    const allCellsProducts = document.getElementsByTagName('td');
     caloriesTitle.setAttribute('data-sort', 'start');
 
     tableOfProducts.addEventListener('click', event => {
@@ -91,16 +91,12 @@ async function drawModalWindow() {
             }
         }
         if (event.target === productTitle || event.target.tagName === 'I' && event.target.parentElement === productTitle) {
-            clearRows(rowTitles, acceptButton);
-            caloriesTitle.innerHTML = 'Количество килокалорий в 100г.';
-            switchOfDataAttribute(productTitle, 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>', 'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', sortByName(result), result);
-            fillTableCellsWithProducts(allCeilsProducts, result);
+            sortingWithClick (rowTitles, acceptButton, caloriesTitle, 'Количество килокалорий в 100г.', productTitle, 'Название продукта <i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>',
+            'Название продукта <i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>', sortByName(products), products, allCellsProducts);
         }
         if (event.target === caloriesTitle || event.target.tagName === 'I' && event.target.parentElement === caloriesTitle) {
-            clearRows(rowTitles, acceptButton);
-            productTitle.innerHTML = 'Название продукта';
-            switchOfDataAttribute(caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>', sortByEnergyCost(result), result);
-            fillTableCellsWithProducts(allCeilsProducts, result);
+            sortingWithClick (rowTitles, acceptButton, productTitle, 'Название продукта', caloriesTitle, 'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-asc" aria-hidden="true"></i>', 
+            'Количество килокалорий в 100г. <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>', sortByEnergyCost(products), products, allCellsProducts);
         }
     })
 
@@ -142,21 +138,18 @@ async function drawModalWindow() {
                 energyCost.value = '';
                 addNewProduct.classList.remove('activeButton');
             }
-            result.push(newProduct);
-            let response = await fetch('http://localhost:3000/addProduct', {
+            products.push(newProduct);
+            modalWindowForAddProduct.remove();
+            tableOfProducts.remove();
+            sortByName(products);
+            drawTable(modalWindow, products);
+            await fetch('http://localhost:3000/addProduct', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
-                body: JSON.stringify(result)
+                body: JSON.stringify(products)
             });
-            сonsole.log(response);
-            let answer = await response.json();
-            console.log(answer);
-            modalWindowForAddProduct.remove();
-            tableOfProducts.remove();
-            sortByName(result);
-            drawTable(modalWindow, result);
         })
 
         closeWindowOfAddProduct.addEventListener('click', () => {
@@ -196,12 +189,12 @@ async function drawModalWindow() {
         const inputsQuantityEat = document.getElementsByTagName('input');
         for (let input of inputsQuantityEat) {
             input.addEventListener('change', event => {
-                calculateCalories(event, result);
+                calculateCalories(event, products);
                 calculateCaloriesMain();
             })
         }
         const deleteElements = document.getElementsByClassName('fa-times');
-        for (buttonDelete of deleteElements) {
+        for (let buttonDelete of deleteElements) {
             buttonDelete.addEventListener('click', event => {
                 event.stopImmediatePropagation();
                 let targetStringMeal = event.target.parentElement.parentElement.parentElement.previousElementSibling;
@@ -226,8 +219,23 @@ async function drawModalWindow() {
 }
 
 async function getDataFromServer(addresOfRequest) {
-    let response = await fetch(addresOfRequest);
-    return await response.json();
+    try {
+        let response = await fetch(addresOfRequest);
+        return await response.json();
+    } catch (error) {
+        mainPage.remove();
+        const [body] = document.getElementsByTagName('body');
+        let err = document.createElement('div');
+        err.innerHTML = '<img class = "error404" src="https://cs8.pikabu.ru/post_img/2016/03/28/11/og_og_1459194302236352360.jpg">'
+        body.appendChild(err);
+    }
+}
+
+function sortingWithClick(rowTitles, acceptButton, aginstTitle, symbolAgainstTitle, title, symbolBySuccess, symbolByFailure, functionForSort, objectForReverse, allCellsProducts) {
+    clearRows(rowTitles, acceptButton);
+    aginstTitle.innerHTML = symbolAgainstTitle;
+    switchOfDataAttribute(title, symbolBySuccess, symbolByFailure, functionForSort, objectForReverse);
+    fillTableCellsWithProducts(allCellsProducts, objectForReverse);
 }
 
 const sortByName = object => {
@@ -376,15 +384,5 @@ function calculateCaloriesMain() {
     allCaloriesBlock.innerHTML += textForRemain;
     if (remain === allCalories) {
         allCaloriesBlock.firstElementChild.remove();
-    }
-    const buttonsCollection = document.getElementsByTagName('button')
-    for (let button of buttonsCollection) {
-        if (remain < 0) {
-            button.setAttribute('disabled', true);
-            button.classList.add('unactive');
-        } else {
-            button.removeAttribute('disabled');
-            button.classList.remove('unactive');
-        }
     }
 }   

@@ -4,7 +4,7 @@
     background-size: cover;
     width: 550px;
     padding: 20px;
-    height: 600px;
+    min-height: 650px;
     margin: auto;
     border-radius: 1em;
     position: relative;
@@ -115,7 +115,7 @@ p{
 .modal{
     position: absolute;
     width: 590px;
-    height: 640px;
+    height: 700px;
     background-color: white;
     top: 0;
     left: 0;
@@ -193,7 +193,7 @@ td{
 .modalForAdd {
     position: absolute;
     width: 590px;
-    height: 700px;
+    height: 730px;
     background-color: white;
     top: -30px;
     left: 0;
@@ -217,4 +217,8 @@ td{
 }
 .modalForAdd i{
     font-size: 26px;
+}
+.error404 {
+    display: block;
+    margin: auto;
 }
